@@ -15,10 +15,13 @@ black = (0, 0, 0)
 
 # ---------- LOADS FILES FROM FOLDER ---------- #
 
-# LOADS BACKGROUNDS #
+# LOADS BACKGROUNDS, TITLE SCREEN, WIN SCREEN #
 
 background = pygame.image.load('C:/Users/' + username + '/Downloads/CheckersPython/background.jpg')
 dark_background = pygame.image.load('C:/Users/' + username + '/Downloads/CheckersPython/dark_background.jpg')
+title_screen = pygame.image.load('C:/Users/' + username + '/Downloads/CheckersPython/loadingscreen.png')
+red_win = pygame.image.load('C:/Users/' + username + '/Downloads/CheckersPython/red_win.jpg')
+black_win = pygame.image.load('C:/Users/' + username + '/Downloads/CheckersPython/black_win.jpg')
 
 # LOADS IMAGES FOR PIECES #
 
@@ -61,11 +64,19 @@ red_cancel_rect = pygame.Rect(640, 80, 80, 80)
 black_cancel = pygame.image.load('C:/Users/' + username + '/Downloads/CheckersPython/BlackCancel.png')
 black_cancel_rect = pygame.Rect(640, 480, 80, 80)
 
+# LOADS FONTS #
+
+moves_word_font = pygame.font.SysFont("cambria", 16, bold=True)
+moves_1_2dig_font = pygame.font.SysFont("cambria", 48)
+moves_3dig_font = pygame.font.SysFont("cambria", 40)
+moves_largenum_font = pygame.font.SysFont("cambria", 24)
+
+moves_word_text = moves_word_font.render("Moves:", True, black)
+
 pygame.display.flip()
 
 
 # ---------- PIECE CLASS ---------- #
-
 
 class Piece:
 
@@ -141,6 +152,8 @@ class Piece:
         global red_cancel_rect
         global black_cancel_rect
 
+        global moves
+
         invalid_move = False
         move_canceled = False
 
@@ -150,7 +163,10 @@ class Piece:
 
             for event in pygame.event.get():
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.QUIT:
+                    sys.exit('Thanks for playing!')
+
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     (new_x, new_y) = pygame.mouse.get_pos()
 
                     if self.color == 'red' and red_cancel_rect.collidepoint(new_x, new_y):
@@ -482,7 +498,7 @@ class Piece:
 
                             break
 
-                        # UPDATES THE ACTUAL POSITION #
+                        # UPDATES POSITION #
 
                         if not invalid_move:
 
@@ -501,19 +517,12 @@ class Piece:
                                 pygame.mixer.music.load(move_sound)
                                 pygame.mixer.music.play(1)
 
+                            moves += 1
+
                         done = True
                         graphics_complete = False
 
                     break
-
-# ---------- GRID ---------- #
-
-grid = []
-for x in range(8):
-    column = []
-    for y in range(8):
-        column.append(white)
-    grid.append(column)
 
 
 # ---------- FUNCTION THAT CHECKS IF A PLAYER HAS WON ---------- #
@@ -548,8 +557,11 @@ def has_won():
 
     global game_over
     global sound_on
+    global graphics_complete
+    global red_turn
 
-    # CHECKS IF BLACK HAS WON #
+    # CHECKS IF BLACK HAS WON - I.E., RED HAS NO PIECES #
+
     try:
         red_1
     except NameError:
@@ -592,17 +604,77 @@ def has_won():
                                                     reblit()
 
                                                     if sound_on:
+
+                                                        # PLAYS VICTORY SOUND #
+
                                                         pygame.mixer.music.stop()
                                                         pygame.mixer.music.load(win_sound)
                                                         pygame.mixer.music.play(1)
 
-                                                    is_busy = pygame.mixer.music.get_busy()
+                                                    # GRADUALLY DISPLAYS WIN SCREEN #
 
-                                                    while is_busy:
-                                                        pygame.time.wait(30)
-                                                        is_busy = pygame.mixer.music.get_busy()
+                                                    black_win.set_alpha(0)
+                                                    black_win_alpha_value = 0
 
-                                                    sys.exit('Black has won!')
+                                                    screen.blit(black_win, (0, 0))
+
+                                                    while black_win.get_alpha() <= 200 and game_over:
+
+                                                        for win_event in pygame.event.get():
+
+                                                            if win_event.type == pygame.QUIT:
+                                                                sys.exit('Thanks for playing!')
+
+                                                            elif win_event.type == pygame.MOUSEBUTTONDOWN:
+                                                                (win_x, win_y) = pygame.mouse.get_pos()
+
+                                                                if win_x in range(218, 503) and win_y in range(485, 590):
+
+                                                                    # RESTARTS GAME #
+
+                                                                    game_over = False
+
+                                                                    red_1 = Piece('red', 1, 0)
+                                                                    red_2 = Piece('red', 3, 0)
+                                                                    red_3 = Piece('red', 5, 0)
+                                                                    red_4 = Piece('red', 7, 0)
+                                                                    red_5 = Piece('red', 0, 1)
+                                                                    red_6 = Piece('red', 2, 1)
+                                                                    red_7 = Piece('red', 4, 1)
+                                                                    red_8 = Piece('red', 6, 1)
+                                                                    red_9 = Piece('red', 1, 2)
+                                                                    red_10 = Piece('red', 3, 2)
+                                                                    red_11 = Piece('red', 5, 2)
+                                                                    red_12 = Piece('red', 7, 2)
+
+                                                                    black_1 = Piece('black', 0, 5)
+                                                                    black_2 = Piece('black', 2, 5)
+                                                                    black_3 = Piece('black', 4, 5)
+                                                                    black_4 = Piece('black', 6, 5)
+                                                                    black_5 = Piece('black', 1, 6)
+                                                                    black_6 = Piece('black', 3, 6)
+                                                                    black_7 = Piece('black', 5, 6)
+                                                                    black_8 = Piece('black', 7, 6)
+                                                                    black_9 = Piece('black', 0, 7)
+                                                                    black_10 = Piece('black', 2, 7)
+                                                                    black_11 = Piece('black', 4, 7)
+                                                                    black_12 = Piece('black', 6, 7)
+
+                                                                    red_turn = False
+
+                                                                    reblit()
+
+                                                                    graphics_complete = True
+
+                                                        if not game_over:
+
+                                                            break
+
+                                                        black_win_alpha_value += 2
+                                                        black_win.set_alpha(black_win_alpha_value)
+                                                        screen.blit(black_win, (0, 0))
+                                                        pygame.display.flip()
+                                                        pygame.time.delay(25)
 
                                                 else:
                                                     pass
@@ -629,7 +701,7 @@ def has_won():
     else:
         pass
 
-    # CHECKS IF RED HAS WON #
+    # CHECKS IF RED HAS WON - I.E., BLACK HAS NO PIECES #
 
     try:
         black_1
@@ -673,17 +745,77 @@ def has_won():
                                                     reblit()
 
                                                     if sound_on:
+
+                                                        # PLAYS VICTORY SOUND #
+
                                                         pygame.mixer.music.stop()
                                                         pygame.mixer.music.load(win_sound)
                                                         pygame.mixer.music.play(1)
 
-                                                    is_busy = pygame.mixer.music.get_busy()
+                                                    # GRADUALLY DISPLAYS WIN SCREEN #
 
-                                                    while is_busy:
-                                                        pygame.time.wait(30)
-                                                        is_busy = pygame.mixer.music.get_busy()
+                                                    red_win.set_alpha(0)
+                                                    red_win_alpha_value = 0
+                                                    
+                                                    screen.blit(red_win, (0, 0))
+                                                    
+                                                    while red_win.get_alpha() <= 200:
 
-                                                    sys.exit('Black has won!')
+                                                        for win_event in pygame.event.get():
+
+                                                            if win_event.type == pygame.QUIT:
+                                                                sys.exit('Thanks for playing!')
+
+                                                            elif win_event.type == pygame.MOUSEBUTTONDOWN:
+                                                                (win_x, win_y) = pygame.mouse.get_pos()
+
+                                                                if win_x in range(218, 503) and win_y in range(485, 590):
+
+                                                                    # RESTARTS GAME #
+
+                                                                    game_over = False
+
+                                                                    red_1 = Piece('red', 1, 0)
+                                                                    red_2 = Piece('red', 3, 0)
+                                                                    red_3 = Piece('red', 5, 0)
+                                                                    red_4 = Piece('red', 7, 0)
+                                                                    red_5 = Piece('red', 0, 1)
+                                                                    red_6 = Piece('red', 2, 1)
+                                                                    red_7 = Piece('red', 4, 1)
+                                                                    red_8 = Piece('red', 6, 1)
+                                                                    red_9 = Piece('red', 1, 2)
+                                                                    red_10 = Piece('red', 3, 2)
+                                                                    red_11 = Piece('red', 5, 2)
+                                                                    red_12 = Piece('red', 7, 2)
+
+                                                                    black_1 = Piece('black', 0, 5)
+                                                                    black_2 = Piece('black', 2, 5)
+                                                                    black_3 = Piece('black', 4, 5)
+                                                                    black_4 = Piece('black', 6, 5)
+                                                                    black_5 = Piece('black', 1, 6)
+                                                                    black_6 = Piece('black', 3, 6)
+                                                                    black_7 = Piece('black', 5, 6)
+                                                                    black_8 = Piece('black', 7, 6)
+                                                                    black_9 = Piece('black', 0, 7)
+                                                                    black_10 = Piece('black', 2, 7)
+                                                                    black_11 = Piece('black', 4, 7)
+                                                                    black_12 = Piece('black', 6, 7)
+
+                                                                    red_turn = False
+
+                                                                    reblit()
+
+                                                                    graphics_complete = True
+
+                                                            if not game_over:
+
+                                                                break
+
+                                                            red_win_alpha_value += 2
+                                                            red_win.set_alpha(red_win_alpha_value)
+                                                            screen.blit(red_win, (0, 0))
+                                                            pygame.display.flip()
+                                                            pygame.time.delay(25)
 
                                                 else:
                                                     pass
@@ -710,8 +842,8 @@ def has_won():
     else:
         pass
 
-# ---------- RE-BLITS GRAPHICS --------- #
 
+# ---------- RE-BLITS GRAPHICS --------- #
 
 def reblit():
 
@@ -728,15 +860,28 @@ def reblit():
     global sound_on
     global sound_rect
 
-    for a in range(8):
-        for b in range(8):
-            if a % 2 == b % 2:
-                screen.blit(background, (a * 80 + 2.5, b * 80 + 2.5))
-            else:
-                screen.blit(dark_background, (a * 80 + 2.5, b * 80 + 2.5))
+    global moves
+    global moves_text
+    global moves
 
-            rect = pygame.Rect(a * 80, b * 80, 80, 80)
-            pygame.draw.rect(screen, black, rect, 5)
+    if not game_over:
+
+        for a in range(8):
+            for b in range(8):
+
+                # DISPLAYS BACKGROUND IMAGES #
+
+                if a % 2 == b % 2:
+                    screen.blit(background, (a * 80 + 2.5, b * 80 + 2.5))
+                else:
+                    screen.blit(dark_background, (a * 80 + 2.5, b * 80 + 2.5))
+
+                # DRAWS BOARD SQUARES #
+
+                rect = pygame.Rect(a * 80, b * 80, 80, 80)
+                pygame.draw.rect(screen, black, rect, 5)
+
+    # CHECKS WHICH PIECES EXIST AND DISPLAYS THEM #
 
     try:
         red_1
@@ -921,34 +1066,57 @@ def reblit():
                 has_won()
 
     # RECTS FOR OUTSIDE THE BOARD #
-    pygame.draw.rect(screen, white, (640, 0, 160, 640), 0)
-    pygame.draw.rect(screen, black, (640, 0, 80, 640), 5)
-    pygame.draw.rect(screen, black, (640, 160, 80, 400), 5)
-    pygame.draw.rect(screen, black, red_cancel_rect, 5)
-    pygame.draw.rect(screen, black, black_cancel_rect, 5)
-    pygame.draw.line(screen, black, (640, 320), (720, 320), 5)
 
-    # TURN INDICATOR #
+    if not game_over:
 
-    if red_turn:
-        pygame.draw.polygon(screen, (0, 0, 0), ((680, 184), (655, 290), (680, 272), (705, 290)))
-        pygame.draw.polygon(screen, (254, 0, 0), ((680, 195), (660, 283), (680, 267), (700, 283)))
+        pygame.draw.rect(screen, white, (640, 0, 160, 640), 0)
+        pygame.draw.rect(screen, black, (640, 0, 80, 640), 5)
+        pygame.draw.rect(screen, black, (640, 160, 80, 400), 5)
+        pygame.draw.rect(screen, black, red_cancel_rect, 5)
+        pygame.draw.rect(screen, black, black_cancel_rect, 5)
+        pygame.draw.line(screen, black, (640, 320), (720, 320), 5)
+        pygame.draw.rect(screen, white, (645, 565, 70, 70), 0)
 
-        pygame.draw.polygon(screen, (0, 0, 0), ((680, 456), (656, 350), (680, 368), (704, 350)), 2)
+        # BLITS MOVE COUNTER #
 
-    else:
-        pygame.draw.polygon(screen, (0, 0, 0), ((680, 456), (656, 350), (680, 368), (704, 350)))
-        pygame.draw.polygon(screen, (105, 105, 105), ((680, 445), (660, 357), (680, 373), (700, 357)))
+        screen.blit(moves_word_text, (657, 565))
 
-        pygame.draw.polygon(screen, (0, 0, 0), ((680, 184), (655, 290), (680, 272), (705, 290)), 2)
+        if moves < 10 and not game_over:
+            moves_text = moves_1_2dig_font.render(str(moves), True, black)
+            screen.blit(moves_text, (667, 577))
+        elif moves < 100 and not game_over:
+            moves_text = moves_1_2dig_font.render(str(moves), True, black)
+            screen.blit(moves_text, (653, 577))
+        elif moves < 1000 and not game_over:
+            moves_text = moves_3dig_font.render(str(moves), True, black)
+            screen.blit(moves_text, (645, 577))
+        elif moves >= 1000 and not game_over:
+            moves_text = moves_largenum_font.render("1000+", True, black)
+            screen.blit(moves_text, (645, 585))
 
-    # RED CANCEL MOVE #
+        # TURN INDICATOR #
 
-    screen.blit(red_cancel, (645, 100))
+        if red_turn:
 
-    # BLACK CANCEL MOVE #
+            pygame.draw.polygon(screen, (0, 0, 0), ((680, 184), (655, 290), (680, 272), (705, 290)))
+            pygame.draw.polygon(screen, (254, 0, 0), ((680, 195), (660, 283), (680, 267), (700, 283)))
 
-    screen.blit(black_cancel, (645, 500))
+            pygame.draw.polygon(screen, (0, 0, 0), ((680, 456), (656, 350), (680, 368), (704, 350)), 2)
+
+        else:
+
+            pygame.draw.polygon(screen, (0, 0, 0), ((680, 456), (656, 350), (680, 368), (704, 350)))
+            pygame.draw.polygon(screen, (105, 105, 105), ((680, 445), (660, 357), (680, 373), (700, 357)))
+
+            pygame.draw.polygon(screen, (0, 0, 0), ((680, 184), (655, 290), (680, 272), (705, 290)), 2)
+
+        # RED CANCEL MOVE #
+
+        screen.blit(red_cancel, (645, 100))
+
+        # BLACK CANCEL MOVE #
+
+        screen.blit(black_cancel, (645, 500))
 
     pygame.display.flip()
 
@@ -957,9 +1125,10 @@ def reblit():
 # ---------- GAME ---------- #
 
 
-on = True
+on = False
 sound_on = True
 game_over = False
+moves = 0
 
 red_time = 9000
 black_time = 9000
@@ -992,9 +1161,42 @@ black_10 = Piece('black', 2, 7)
 black_11 = Piece('black', 4, 7)
 black_12 = Piece('black', 6, 7)
 
+past_title = False
+
 graphics_complete = False
 
 red_turn = True
+
+# DISPLAYS TITLE SCREEN AND SETS UP THE TRANSITION TO THE GAME #
+
+title_screen.set_alpha(255)
+title_alpha_value = 255
+screen.blit(title_screen, (0, 0))
+pygame.display.flip()
+
+while not past_title:
+
+    for event in pygame.event.get():
+
+        if event.type == pygame.QUIT:
+            sys.exit('Thanks for playing!')
+
+        elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+
+            while title_screen.get_alpha() >= 1:
+
+                title_alpha_value -= 5
+                pygame.draw.rect(screen, (128, 128, 128), (0, 0, 720, 640), 0)
+                title_screen.set_alpha(title_alpha_value)
+                screen.blit(title_screen, (0, 0))
+                pygame.display.flip()
+                pygame.time.delay(1)
+
+            past_title = True
+
+            on = True
+
+            break
 
 # RUNS ACTUAL GAME #
 
@@ -1007,21 +1209,22 @@ while on:
 
     # SOUND CAN BE CHANGED INDEPENDENTLY OF BOARD, SO THE TWO ARE SEPARATED #
 
-    if sound_on:
+    if sound_on and not game_over:
         screen.blit(sound_on_img, (643, 2.5))
-    else:
-        screen.blit(sound_off_img, (644, 2.5))
+        pygame.draw.rect(screen, black, sound_rect, 5)
 
-    pygame.draw.rect(screen, black, sound_rect, 5)
+    elif not sound_on and not game_over:
+        screen.blit(sound_off_img, (644, 2.5))
+        pygame.draw.rect(screen, black, sound_rect, 5)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            on = False
+            sys.exit('Thanks for playing!')
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             (pos_x, pos_y) = pygame.mouse.get_pos()
 
-            if pos_x in range(640, 720) and pos_y in range(0, 80):
+            if pos_x in range(640, 720) and pos_y in range(0, 80) and not game_over:
 
                 sound_on = not sound_on
 
